@@ -1,7 +1,8 @@
 # AcidCam2.Linux
 
 Command line version of Acid Cam for Linux
-
+On Debian Linux install the package libopencv-dev
+then
 To compile use
 
 ./configure
