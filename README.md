@@ -6,6 +6,8 @@ then
 To compile use
 
 ./configure
+make
+
 
 pass a path to configure if OpenCV 3 is installed somewhere else example
 
