@@ -6,6 +6,7 @@ then
 To compile use
 
 ./configure
+
 make
 
 
