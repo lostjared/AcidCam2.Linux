@@ -153,9 +153,9 @@ int main(int argc, char **argv) {
 
 		int slider_value = 0, slider_neg = 0, slider_neg_f = 0, slider_pass2 = 0, slider_rev = 0, slider_show = 0, slider_rand = 0, slider_strobe = 0, slider_blur_f = 0, slider_blur_s = 0;
 		cv::namedWindow("Acid Cam v2", 1);
-		/*cv::namedWindow("Controls");
-		cv::createTrackbar("Change Filter", "Acid Cam v2",&slider_value, ac::draw_max, TrackbarCallback);
-		cv::createTrackbar("Filter Negative", "Controls", &slider_neg, 1, IsNegativeCallback);
+		//cv::namedWindow("Controls");
+		cv::createTrackbar("Change Filter", "Acid Cam v2",&slider_value, ac::draw_max, TrackbarCallback);		
+		/*cv::createTrackbar("Filter Negative", "Controls", &slider_neg, 1, IsNegativeCallback);
 		cv::createTrackbar("Negative Flash", "Controls", &slider_neg_f,1, IsNegativeFlash);
 		cv::createTrackbar("Reverse Colors", "Controls", &slider_rev, 1, ReverseColors);
 		cv::createTrackbar("Slide Show", "Controls", &slider_show, 1, SlideShow);
@@ -183,6 +183,12 @@ int main(int argc, char **argv) {
 			}
 
 			if( (key = cv::waitKey(30)) ) {
+				//std::cout << "Keypressed: " << (key & 0xff) << "\n";
+				
+				#ifdef __linux__
+				key = key & 0xff;
+				#endif
+
 				switch(key) {
 				case 't':
 					ac::resetAll();
