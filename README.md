@@ -1,5 +1,8 @@
 # AcidCam2.Linux
 
+![ScreenShot](http://lostsidedead.biz/acidcam/acidcam-linux.png "screenshot")
+
+
 Command line version of Acid Cam for Linux
 On Debian Linux install the package libopencv-dev
 then
