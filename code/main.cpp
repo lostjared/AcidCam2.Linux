@@ -383,6 +383,9 @@ void custom_filter(cv::Mat &frame) {
     
 }
 
+void ac::plugin(cv::Mat &frame) {
+    
+}
 
 void ProcFrame(cv::Mat &frame) {
 	static int offset = 0;

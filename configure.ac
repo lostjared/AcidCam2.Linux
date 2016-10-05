@@ -1,5 +1,5 @@
 C_PREREQ([2.64])
-AC_INIT(AcidCam, 2.0.19, jaredbruni@gmail.com)
+AC_INIT(AcidCam, 2.0.24, jaredbruni@gmail.com)
 
 AC_CONFIG_HEADERS(config.h)
 
