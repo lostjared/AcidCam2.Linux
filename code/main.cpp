@@ -97,6 +97,8 @@ int main(int argc, char **argv) {
 				}
 				else {
 					ac::blendW = true;
+                    blend_image = ac::blendW_frame;
+                    blend_set = true;
 					std::cout << "AC: loaded image " << optarg << "\n";
 				}
 			}
