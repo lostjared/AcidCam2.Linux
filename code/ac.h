@@ -1,9 +1,8 @@
 /* Acid Cam Functions for OpenCV
  * written by Jared Bruni
  * http://lostsidedead.com
- * GPL
+ * (C) 2016 - GPL
  */
-
 #ifndef __AC_H__
 #define __AC_H__
 #include<iostream>
@@ -15,8 +14,6 @@
 #include<ctime>
 #include<cmath>
 #include "opencv2/opencv.hpp"
-
-
 /*
  * to use set appropriate variables, call the function
  *
@@ -33,13 +30,12 @@
  * ac::draw_strings[function_index];
  *
  */
-
 extern int current_filterx, bytesPerSample, bytesPerRow, width, height, red, green, blue, offset, randomNumber, reverse;
-extern bool negate;
-
+extern bool negate, blend_set;
+extern cv::Mat blend_image;
 
 namespace ac {
-    static std::string version="2.0.24";
+    static const std::string version="2.0.28";
     extern double translation_variable, pass2_alpha;
     extern double alpha, tr;
     extern bool isNegative, noRecord,pass2_enabled,blendW,slide_Show,slide_Rand,strobe_It,switch_Back,blur_First,blur_Second,iRev;
@@ -52,16 +48,13 @@ namespace ac {
     extern cv::Mat image_files[4];
     extern bool images_Enabled,fps_force;
     extern int snapshot_Type;
-    
     inline int GetFX(cv::Mat &frame, int x, int nw);
     inline int GetFY(cv::Mat &frame, int y, int nh);
     inline void invert(cv::Mat &frame, int x, int y);
     inline void randAlpha(double &value);
     void resetAll();
     void enablePass2(bool pass2_enabled, bool pass2_alpha);
-    
     typedef void (*DrawFunction)(cv::Mat &frame);
-    
     void SelfAlphaBlend(cv::Mat &frame);
     void SelfScale(cv::Mat &frame);
     void StrobeEffect(cv::Mat &frame);
@@ -97,17 +90,25 @@ namespace ac {
     void glitchSort(cv::Mat &frame);
     void pixelSort(cv::Mat &frame);
     void randomFilter(cv::Mat &frame);
+    void imageBlend(cv::Mat &frame);
+    void imageBlendTwo(cv::Mat &frame);
+    void imageBlendThree(cv::Mat &frame);
+    void GaussianBlur(cv::Mat &frame);
+    void MedianBlur(cv::Mat &frame);
+    void BlurDistortion(cv::Mat &frame);
+    void DiamondPattern(cv::Mat &frame);
+    void MirrorBlend(cv::Mat &frame);
+    void Pulse(cv::Mat &frame);
+    void SidewaysMirror(cv:: Mat &frame);
+    void MirrorNoBlend(cv::Mat &frame);
     void plugin(cv::Mat &frame);
     // draw functions / strings
-    static std::string draw_strings[] = { "Self AlphaBlend", "Self Scale", "StrobeEffect", "Blend #3", "Negative Paradox", "ThoughtMode", "RandTriBlend", "Blank", "Tri", "Distort", "CDraw", "Type", "NewOne", "Blend Fractal","Blend Fractal Mood", "CosSinMultiply", "Color Accumlate1", "Color Accumulate2", "Color Accumulate3", "filter8","filter3","Rainbow Blend","Rand Blend","New Blend", "Alpha Flame Filters", "Pixel Scale", "PixelSort", "GlitchSort","Random Filter", "Plugin", "Custom","Blend With Image #1",  "TriBlend with Image", "Image Strobe", "Image distraction" };
-    
-    ;
-    extern DrawFunction draw_func[36];
+    extern std::string draw_strings[];
+    extern DrawFunction draw_func[];
     extern int draw_max;
     extern bool snapShot;
 }
 
 extern void custom_filter(cv::Mat &frame);
-
 
 #endif

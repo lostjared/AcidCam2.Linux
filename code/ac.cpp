@@ -1,11 +1,13 @@
 /*
  *
  *  Acid Cam functions for OpenCV
+ * written by Jared Bruni
+ * http://lostsidedead.com
+ * (C) 2016 under GPL
  */
 
 #include "ac.h"
 #include "fractal.h"
-
 
 namespace ac {
     bool isNegative = false, noRecord = false, pass2_enabled = false, blendW = false, slide_Show = false, slide_Rand = false, strobe_It = false, switch_Back = false, blur_First = false;
@@ -21,22 +23,20 @@ namespace ac {
     int color_order = 0;
     int snapshot_Type = 0;
     
+    std::string draw_strings[] = { "Self AlphaBlend", "Self Scale", "StrobeEffect", "Blend #3", "Negative Paradox", "ThoughtMode", "RandTriBlend", "Blank", "Tri", "Distort", "CDraw", "Type", "NewOne", "Blend Fractal","Blend Fractal Mood", "CosSinMultiply", "Color Accumlate1", "Color Accumulate2", "Color Accumulate3", "filter8","filter3","Rainbow Blend","Rand Blend","New Blend", "Alpha Flame Filters", "Pixel Scale", "PixelSort", "GlitchSort","Random Filter", "Blend with Image", "Blend with Image #2", "Blend with Image #3", "GaussianBlur", "Median Blur", "Blur Distortion", "Diamond Pattern", "MirrorBlend","Pulse","Sideways Mirror","Mirror No Blend","Plugin", "Custom","Blend With Image #1",  "TriBlend with Image", "Image Strobe", "Image distraction" };
+
     DrawFunction draw_func[] = { SelfAlphaBlend, SelfScale, StrobeEffect, Blend3, NegParadox, ThoughtMode, RandTriBlend, Blank, Tri, Distort, CDraw,Type,NewOne,blendFractal,blendFractalMood,cossinMultiply, colorAccumulate1, colorAccumulate2, colorAccumulate3,filter8,filter3,rainbowBlend,randBlend,newBlend,
-        alphaFlame, pixelScale,pixelSort, glitchSort,randomFilter,plugin, custom,blendWithImage, triBlendWithImage,imageStrobe, imageDistraction,0};
-    int draw_max = 34;
+        alphaFlame, pixelScale,pixelSort, glitchSort,randomFilter,imageBlend,imageBlendTwo,imageBlendThree,GaussianBlur, MedianBlur, BlurDistortion,DiamondPattern,MirrorBlend,Pulse,SidewaysMirror,MirrorNoBlend,plugin,custom,blendWithImage, triBlendWithImage,imageStrobe, imageDistraction,0};
+    int draw_max = 45;
     double translation_variable = 0.001f, pass2_alpha = 0.75f;
-    
     inline void swapColors(cv::Mat &frame, int x, int y);
 }
 
 inline void ac::swapColors(cv::Mat &frame, int x, int y) {
-    
     if(color_order == 0) return;
-    
     cv::Vec3b &cur = frame.at<cv::Vec3b>(x,y);
     cv::Vec3b temp;
     temp = cur;
-    
     switch(color_order) {
         case 1:
             cur[0] = temp[2];
@@ -58,20 +58,16 @@ inline void ac::swapColors(cv::Mat &frame, int x, int y) {
             cur[1] = temp[0];
             cur[2] = temp[2];
             break;
-            
     }
 }
 
 inline void ac::invert(cv::Mat &frame, int x, int y) {
-    
     cv::Vec3b &cur = frame.at<cv::Vec3b>(x,y);
-    
     if(isNegative == true) {
         cur[0] = ~cur[0];
         cur[1] = ~cur[1];
         cur[2] = ~cur[2];
     }
-    
     if(iRev == true) {
         cv::Vec3b temp;
         temp = cur;
@@ -90,7 +86,6 @@ inline void ac::randAlpha(double &alpha) {
         ++max;
     else
         --max;
-    
     if (max > total) {
         dir = false;
         total++;
@@ -124,15 +119,12 @@ void ac::SelfAlphaBlend(cv::Mat &frame) {
             colorval[0] += colorval[0]*alpha;
             colorval[1] += colorval[1]*alpha;
             colorval[2] += colorval[2]*alpha;
-            
             swapColors(frame, z, i);
-            
             if(isNegative == true) {
                 invert(frame, z, i);
             }
         }
     }
-    
     static int direction = 1;
     if(direction == 1) {
         alpha += 0.1f;
@@ -155,7 +147,6 @@ void ac::SelfScale(cv::Mat &frame) {
             pixel[2] = pixel[2] * pos;
             swapColors(frame, z, i);
             if(isNegative) invert(frame, z, i);
-            
         }
     }
     static int direction = 1;
@@ -207,9 +198,7 @@ void ac::StrobeEffect(cv::Mat &frame) {
                     break;
                 }
             }
-            
             swapColors(frame, i, z);
-            
             if(isNegative == true) {
                 invert(frame, i, z);
             }
@@ -226,9 +215,7 @@ void ac::StrobeEffect(cv::Mat &frame) {
         if(max > 23) max = 4.0f;
     }
     alpha += tr;
-    
 }
-
 
 void ac::Blend3(cv::Mat &frame) {
     static int i=0,z=0;
@@ -238,9 +225,7 @@ void ac::Blend3(cv::Mat &frame) {
             cv::Vec3b &color_value = frame.at<cv::Vec3b>(i, z);
             for (int j = 0; j < 3; ++j)
                 color_value[j] += color_value[j] * rValue[j];
-            
             swapColors(frame, i, z);
-            
             if(isNegative == true) {
                 invert(frame, i, z);
             }
@@ -263,9 +248,7 @@ void ac::NegParadox(cv::Mat &frame) {
             color_value[0] += (colors[0][0] * alpha) + (colors[1][0] * alpha);
             color_value[1] += (colors[1][1] * alpha) + (colors[3][1] * alpha);
             color_value[2] += (colors[1][2] * alpha) + (colors[2][2] * alpha);
-            
             swapColors(frame, i, z);
-            
             if(isNegative == true) {
                 invert(frame, i, z);
             }
@@ -276,10 +259,7 @@ void ac::NegParadox(cv::Mat &frame) {
         trans_var = translation_variable;
     else if (alpha > 15)
         trans_var = -translation_variable;
-    
     alpha += trans_var;
-    
-    
 }
 
 void ac::ThoughtMode(cv::Mat &frame) {
@@ -294,16 +274,12 @@ void ac::ThoughtMode(cv::Mat &frame) {
             color_value[mode] += color_value[mode]*alpha;
             mode++;
             if(mode >= 3) mode = 0;
-            
             swapColors(frame, i, z);
-            
             if(isNegative == true) {
                 invert(frame, i, z);
             }
-            
         }
    	}
-    
     sw = !sw;
     tr = !tr;
     static double max = 4.0f;
@@ -315,7 +291,6 @@ void ac::ThoughtMode(cv::Mat &frame) {
         if(max > 23) max = 4.0f;
     }
     alpha += trans_var;
-    
 }
 
 void ac::Pass2Blend(cv::Mat &frame) {
@@ -359,9 +334,7 @@ void ac::RandTriBlend(cv::Mat &frame) {
             }
             cv::Vec3b &color_value = frame.at<cv::Vec3b>(i, z);
             color_value = colors[3];
-            
             swapColors(frame, i, z);
-            
             if(isNegative == true) {
                 invert(frame, i, z);
             }
@@ -377,7 +350,6 @@ void ac::RandTriBlend(cv::Mat &frame) {
             max = 4.0f;
     }
     alpha += trans_var;
-    
 }
 
 void ac::Blank(cv::Mat &frame) {
@@ -392,9 +364,7 @@ void ac::Blank(cv::Mat &frame) {
                 color_value[j] += val[2-j] / (j+1);
                 if(color_switch == true) color_value[j] = -color_value[j];
             }
-            
             swapColors(frame, i, z);
-            
             if(isNegative == true) {
                 invert(frame, i, z);
             }
@@ -411,7 +381,6 @@ void ac::Blank(cv::Mat &frame) {
             max = 4.0f;
     }
     alpha += trans_var;
-    
 }
 
 void ac::Tri(cv::Mat &frame) {
@@ -425,9 +394,7 @@ void ac::Tri(cv::Mat &frame) {
             color_value[0] += color_value[0]*alpha;
             color_value[1] += color_value[1]+colors[0][1]+colors[1][1]*alpha;
             color_value[2] += color_value[2]+colors[0][2]+colors[1][2]*alpha;
-            
             swapColors(frame, i, z);
-            
             if(isNegative == true) {
                 invert(frame, i, z);
             }
@@ -443,7 +410,6 @@ void ac::Tri(cv::Mat &frame) {
             max = 4.0f;
     }
     alpha += trans_var;
-    
 }
 
 void ac::Distort(cv::Mat &frame) {
@@ -456,9 +422,7 @@ void ac::Distort(cv::Mat &frame) {
             color_value[2] = (z*alpha)+color_value[2];
             color_value[1] = (alpha*color_value[1]);
             if(strobe_It == true) color_value[1] = ((i+z)*alpha)+color_value[1];
-            
             swapColors(frame, i, z);
-            
             if(isNegative == true) {
                 invert(frame, i, z);
             }
@@ -474,7 +438,6 @@ void ac::Distort(cv::Mat &frame) {
             max = 4.0f;
     }
     alpha += trans_var;
-    
 }
 
 void ac::CDraw(cv::Mat &frame) {
@@ -490,13 +453,8 @@ void ac::CDraw(cv::Mat &frame) {
             color_value[1] = color_value[1]*(cY * alpha);
             color_value[2] = color_value[2]*alpha;
             deg += 0.1f;
-            
-            
             swapColors(frame, i, z);
-            
-            
             if(isNegative) invert(frame, i, z);
-            
         }
     }
     alpha += 0.1f;
@@ -521,11 +479,8 @@ void ac::Type(cv::Mat &frame) {
             current[1] += add_r+current[1];
             current[2] += add_r+current[2];
             current[off] = current[0]+current[1]+current[2];
-            
             swapColors(frame, i, z);
-            
             if(isNegative) invert(frame, i, z);
-            
         }
     }
     ++off;
@@ -535,7 +490,6 @@ void ac::Type(cv::Mat &frame) {
 }
 
 void ac::NewOne(cv::Mat &frame) {
-    
     for(int z = 0; z < frame.cols; ++z) {
         for(int i = 1; i < frame.rows-1; ++i) {
             cv::Vec3b &colv = frame.at<cv::Vec3b>(i, z);
@@ -544,8 +498,6 @@ void ac::NewOne(cv::Mat &frame) {
             unsigned int green_values[] = { colv[2]+cola[0], colv[1]+cola[1], colv[0]+cola[2], 0 };
             unsigned int blue_values[] = { colv[1]+cola[1], colv[0]+cola[2], colv[2]+cola[0], 0 };
             unsigned char R = 0,G = 0,B = 0;
-            
-            
             for(unsigned int iq = 0; iq <= 2; ++iq) {
                 R += red_values[iq];
                 R /= 3;
@@ -557,14 +509,10 @@ void ac::NewOne(cv::Mat &frame) {
             colv[0] += alpha*R;
             colv[1] += alpha*G;
             colv[2] += alpha*B;
-            
             swapColors(frame, i, z);
-            
             if(isNegative) invert(frame, i, z);
-            
         }
     }
-    
     static double max = 8.0f, trans_var = 0.1f;
     if (alpha < 0)
         trans_var = 0.1f;
@@ -583,7 +531,6 @@ void ac::blendFractal(cv::Mat &frame) {
 }
 
 void ac::blendFractalMood(cv::Mat &frame) {
-    
     // random
     unsigned char color = 0;
     color = rand()%255;
@@ -604,7 +551,6 @@ void ac::blendFractalMood(cv::Mat &frame) {
 }
 
 // blend with Image functions
-
 inline int ac::GetFX(cv::Mat &frame, int x, int nw) {
     double xp = (double)x * (double)frame.rows / (double)nw;
     return (int)xp;
@@ -628,9 +574,7 @@ void ac::blendWithImage(cv::Mat &frame) {
             cv::Vec3b &frame_two = blendW_frame.at<cv::Vec3b>(q, j);
             for(int p = 0; p < 3; ++p)
                 frame_one[p] += (frame_one[p]*alpha)+(frame_two[p]*beta);
-            
             swapColors(frame, i, z);
-            
             if(isNegative == true) {
                 invert(frame, i, z);
             }
@@ -647,7 +591,6 @@ void ac::blendWithImage(cv::Mat &frame) {
     }
     alpha += trans_var;
     beta += -trans_var;
-    
 }
 
 void ac::triBlendWithImage(cv::Mat &frame) {
@@ -666,9 +609,7 @@ void ac::triBlendWithImage(cv::Mat &frame) {
             color_value[0] = ((color_value[0]+colors[0][0])/2)*alpha;
             color_value[1] += ((color_value[1]+colors[0][1])/2)*alpha;
             color_value[2] = ((color_value[2]+colors[0][2]+colors[1][2]+colors[2][2])/3)*beta;
-            
             swapColors(frame, i, z);
-            
             if(isNegative == true) {
                 invert(frame, i, z);
             }
@@ -685,7 +626,6 @@ void ac::triBlendWithImage(cv::Mat &frame) {
     }
     alpha += trans_var;
     beta += -trans_var;
-    
 }
 
 
@@ -703,9 +643,7 @@ void ac::imageStrobe(cv::Mat &frame) {
                 colors[j] = image_files[j].at<cv::Vec3b>(cx[j], cy[j]);
             for(j = 0; j < 3; ++j)
                 color_value[j] += (colors[image_offset][j]*alpha);
-            
             swapColors(frame, i, z);
-            
             if(isNegative == true) {
                 invert(frame, i, z);
             }
@@ -723,7 +661,6 @@ void ac::imageStrobe(cv::Mat &frame) {
             max = 4.0f;
     }
     alpha += trans_var;
-    
 }
 
 void ac::imageDistraction(cv::Mat &frame) {
@@ -738,9 +675,7 @@ void ac::imageDistraction(cv::Mat &frame) {
             color_value[0] = (z*alpha)+color_value[0];
             color_value[1] = manip_color[1]*alpha;
             color_value[2] = (i*alpha)+color_value[2];
-            
             swapColors(frame, i, z);
-            
             if(isNegative) invert(frame, i, z);
         }
     }
@@ -756,7 +691,6 @@ void ac::imageDistraction(cv::Mat &frame) {
             max = 4.0f;
     }
     alpha += trans_var;
-    
 }
 
 void ac::cossinMultiply(cv::Mat &frame) {
@@ -768,17 +702,13 @@ void ac::cossinMultiply(cv::Mat &frame) {
             buffer[0] += 1+(sinf(alpha))*z;
             buffer[1] += 1+(cosf(alpha))*i;
             buffer[2] += (buffer[0]+buffer[1]+buffer[2])/3;
-            
             swapColors(frame, i, z);
-            
             if(isNegative) invert(frame, i, z);
-            
         }
     }
     static double trans_var = 0.05f;
     if(alpha > 24) alpha = 1.0f;
     alpha += trans_var;
-    
 }
 
 void ac::colorAccumulate1(cv::Mat &frame) {
@@ -790,9 +720,7 @@ void ac::colorAccumulate1(cv::Mat &frame) {
             buffer[0] += (buffer[2]*alpha);
             buffer[1] += (buffer[0]*alpha);
             buffer[2] += (buffer[1]*alpha);
-            
             swapColors(frame, i, z);
-            
             if(isNegative) invert(frame, i, z);
         }
     }
@@ -809,17 +737,13 @@ void ac::colorAccumulate2(cv::Mat &frame) {
             buffer[0] += (buffer[2]*alpha)+i;
             buffer[1] += (buffer[0]*alpha)+z;
             buffer[2] += (buffer[1]*alpha)+i-z;
-            
             swapColors(frame, i, z);
-            
             if(isNegative) invert(frame, i, z);
         }
     }
     static double trans_var = 0.05f;
     alpha += trans_var;
     if(alpha > 24) alpha = 1.0f;
-    
-    
 }
 void ac::colorAccumulate3(cv::Mat &frame) {
     static double alpha = 1.0f;
@@ -830,16 +754,13 @@ void ac::colorAccumulate3(cv::Mat &frame) {
             buffer[0] = (-buffer[2])+z;
             buffer[1] = (-buffer[0])+i;
             buffer[2] = (-buffer[1])+alpha;
-            
             swapColors(frame, i, z);
-            
             if(isNegative) invert(frame, i, z);
         }
     }
     static double trans_var = 0.05f;
     alpha += trans_var;
     if(alpha > 24) alpha = 1.0f;
-    
 }
 
 void ac::filter8(cv::Mat &frame) {
@@ -852,11 +773,8 @@ void ac::filter8(cv::Mat &frame) {
                 buffer[q] = buffer[q]+((i+z)*alpha);
                 
             }
-            
             swapColors(frame, i, z);
-            
             if(isNegative) invert(frame, i, z);
-            
         }
     }
     static int direction = 1;
@@ -867,8 +785,6 @@ void ac::filter8(cv::Mat &frame) {
         alpha -= 0.05f;
         if(alpha <= 0.1f) { alpha = 0.1f; direction = 1; }
     }
-    
-    
 }
 
 void ac::filter3(cv::Mat &frame) {
@@ -880,14 +796,10 @@ void ac::filter3(cv::Mat &frame) {
             for(q = 0; q < 3; ++q) {
                 buffer[q] = buffer[0]+(buffer[q])*(alpha);
             }
-            
             swapColors(frame, i, z);
-            
             if(isNegative) invert(frame, i, z);
-            
         }
     }
-    
     static int direction = 1;
     if(direction == 1) {
         alpha += 0.1f;
@@ -896,8 +808,6 @@ void ac::filter3(cv::Mat &frame) {
         alpha -= 0.05f;
         if(alpha <= 0.1f) { alpha = 0.1f; direction = 1; }
     }
-    
-    
 }
 
 void ac::rainbowBlend(cv::Mat &frame) {
@@ -947,18 +857,14 @@ void ac::randBlend(cv::Mat &frame) {
             buffer[0] += rr;
             buffer[1] += rg;
             buffer[2] += rb;
-            
             swapColors(frame, i, z);
-            
             if(isNegative) invert(frame, i, z);
         }
     }
 }
 
 void ac::newBlend(cv::Mat &frame) {
-    
     static int pos = 300;
-    
     static int i = 0, z = 0;
     for(z = 0; z < frame.cols; ++z) {
         for(i = 0; i < frame.rows; ++i) {
@@ -966,15 +872,11 @@ void ac::newBlend(cv::Mat &frame) {
             buffer[0] = buffer[2]+(1+(i*z)/pos);
             buffer[1] = buffer[1]+(1+(i*z)/pos);
             buffer[2] = buffer[0]+(1+(i*z)/pos);
-            
             swapColors(frame, i, z);
-            
             if(isNegative) invert(frame, i, z);
         }
     }
-    
     static unsigned int dir = 1;
-    
     if(dir == 1) {
         pos += 25;
         if(pos > 1024) {
@@ -989,13 +891,10 @@ void ac::newBlend(cv::Mat &frame) {
             dir = 1;
         }
     }
-    
 }
 
 void ac::pixelScale(cv::Mat &frame) {
-    
     static double pos = 1.0f;
-    
     static int i = 0, z = 0;
     for(z = 0; z < frame.cols; ++z) {
         for(i = 0; i < frame.rows; ++i) {
@@ -1004,13 +903,10 @@ void ac::pixelScale(cv::Mat &frame) {
             buffer[0] = (buf[0]*pos)+(buf[0]-buffer[2]);
             buffer[1] = (buf[1]*pos)+(buf[1]+buffer[1]);
             buffer[2] = (buf[2]*pos)+(buf[2]-buffer[0]);
-            
             swapColors(frame, i, z);
-            
             if(isNegative) invert(frame, i, z);
         }
     }
-    
     static int direction = 1;
     static double pos_max = 3.0f;
     if(direction == 1) {
@@ -1027,7 +923,6 @@ void ac::pixelScale(cv::Mat &frame) {
             direction = 1;
         }
     }
-    
 }
 
 void ac::glitchSort(cv::Mat &frame) {
@@ -1111,7 +1006,10 @@ void ac::pixelSort(cv::Mat &frame) {
 }
 
 void ac::randomFilter(cv::Mat &frame) {
-    int num = rand()%(draw_max-6);
+    int num;
+    do {
+        num = rand()%(draw_max-6);
+    } while(ac::draw_strings[num] == "Random Filter");
     draw_func[num](frame);
 }
 
@@ -1140,7 +1038,6 @@ void changePixel(cv::Mat &full_buffer, int i, int z, cv::Vec3b &buffer, double p
             break;
         case 1:
         {
-            
             double value = pos;
             buffer[0] = (unsigned char) value*buffer[0];
             buffer[1] = (unsigned char) (-value)*buffer[1];
@@ -1214,13 +1111,11 @@ void changePixel(cv::Mat &full_buffer, int i, int z, cv::Vec3b &buffer, double p
             buffer[0] += alpha*R;
             buffer[1] += alpha*G;
             buffer[2] += alpha*B;
-            
         }
             break;
         case 8:
         {
             unsigned char colv[4], cola[4];
-            
             colv[0] = buffer[0];
             colv[1] = buffer[1];
             colv[2] = buffer[2];
@@ -1418,7 +1313,6 @@ void changePixel(cv::Mat &full_buffer, int i, int z, cv::Vec3b &buffer, double p
             buffer[0] = buffer[0]+buffer[1]*2+pos;
             buffer[1] = buffer[1]+buffer[0]*2+pos;
             buffer[2] = buffer[2]+buffer[0]+pos;
-            
         }
             break;
         case 24:
@@ -1464,29 +1358,23 @@ void changePixel(cv::Mat &full_buffer, int i, int z, cv::Vec3b &buffer, double p
             zq = z+2;
             if(zq > height-2) return;
             cv::Vec3b &temp2 = full_buffer.at<cv::Vec3b>(zq, iq);
-            
             zq = z+3;
             if(zq > height-2) return;
             cv::Vec3b &temp3 = full_buffer.at<cv::Vec3b>(zq, iq);
             zq = z+4;
             if(zq > height-2) return;
             cv::Vec3b &temp4 = full_buffer.at<cv::Vec3b>(zq, iq);
-            
             unsigned char col[4];
-            
             col[0] = (temp[0]+temp2[0]+temp3[0]+temp4[0])/4;
             col[1] = (temp[1]+temp2[1]+temp3[1]+temp4[1])/4;
             col[2] = (temp[2]+temp2[2]+temp3[2]+temp4[2])/4;
-            
             buffer[0] = col[0]*pos;
             buffer[1] = col[1]*pos;
             buffer[2] = col[2]*pos;
-            
         }
             break;
         case 30:
         {
-            
             double rad = 100.0;
             double degree = 0.01*pos;
             int x = (int)rad * cos(degree);
@@ -1495,7 +1383,6 @@ void changePixel(cv::Mat &full_buffer, int i, int z, cv::Vec3b &buffer, double p
             buffer[0] = buffer[0]+x;
             buffer[2] = buffer[1]+y;
             buffer[1] = buffer[1]+z;
-            
         }
             break;
         case 31:
@@ -1516,22 +1403,15 @@ void changePixel(cv::Mat &full_buffer, int i, int z, cv::Vec3b &buffer, double p
             buffer[1] = buffer[1]+value*pos;
             value /= 2;
             buffer[2] = buffer[2]+value*pos;
-            
         }
             break;
         case 33:
         {
-            
-            
             buffer[0] += *count*pos;
             buffer[1] += *count*pos;
             buffer[2] += *count*pos;
-            
             *count += 0.00001f;
             if(*count > 255) *count = 0;
-            
-            
-            
         }
             break;
         case 34:
@@ -1546,10 +1426,7 @@ void changePixel(cv::Mat &full_buffer, int i, int z, cv::Vec3b &buffer, double p
             buffer[0] += *count *z;
             buffer[1] += *count *pos;
             buffer[2] += *count *z;
-            
             *count += 0.0000001f;
-            
-            
         }
             break;
         case 36:
@@ -1560,22 +1437,18 @@ void changePixel(cv::Mat &full_buffer, int i, int z, cv::Vec3b &buffer, double p
         }
             break;
     }
-    
     buffer[0] += red;
     buffer[1] += green;
     buffer[2] += blue;
-    
     if(negate == true) {
         buffer[0] = ~buffer[0];
         buffer[1] = ~buffer[1];
         buffer[2] = ~buffer[2];
     }
-    
     unsigned char buf[3];
     buf[0] = buffer[0];
     buf[1] = buffer[1];
     buf[2] = buffer[2];
-    
     switch(reverse) {
         case 0://normal
             break;
@@ -1603,23 +1476,18 @@ void changePixel(cv::Mat &full_buffer, int i, int z, cv::Vec3b &buffer, double p
 }
 
 void ac::alphaFlame(cv::Mat &frame) {
-    
     static double pos = 1.0f;
     double count = 1.0f;
     static int i = 0, z = 0;
-    
     width = frame.cols;
     height = frame.rows;
-    
     for(z = 0; z < frame.cols; ++z) {
         for(i = 0; i < frame.rows; ++i) {
             cv::Vec3b &buffer = frame.at<cv::Vec3b>(i, z);
             changePixel(frame, z, i, buffer, pos, &count);
-            
         }
     }
     static int direction = 1;
-    
     if(direction == 1) {
         pos += 0.1f;
         if(pos > 512) {
@@ -1636,11 +1504,336 @@ void ac::alphaFlame(cv::Mat &frame) {
     }
 }
 
+int AC_GetFX(int oldw,int x, int nw) {
+    float xp = (float)x * (float)oldw / (float)nw;
+    return (int)xp;
+}
+
+int AC_GetFZ(int oldh, int y, int nh) {
+    float yp = (float)y * (float)oldh / (float)nh;
+    return (int)yp;
+}
+
+void ac::imageBlend(cv::Mat &frame) {
+    static double pos = 1.0f;
+    if(blend_set == true) {
+        int i,z;
+        for(i = 0; i < frame.cols; ++i) {
+            for(z = 0; z < frame.rows; ++z) {
+                int cX = AC_GetFX(blend_image.cols, i, frame.cols);
+                int cY = AC_GetFZ(blend_image.rows, z, frame.rows);
+                cv::Vec3b &current = frame.at<cv::Vec3b>(z, i);
+                cv::Vec3b im = blend_image.at<cv::Vec3b>(cY, cX);
+                current[0] = current[0]+(im[0]*pos);
+                current[1] = current[1]+(im[1]*pos);
+                current[2] = current[2]+(im[2]*pos);
+                swapColors(frame, z, i);
+                if(isNegative) invert(frame, z, i);
+            }
+        }
+    }
+    static int direction = 1;
+    static double pos_max = 7.0f;
+    if(direction == 1) {
+        pos += 0.05;
+        if(pos > pos_max) {
+            pos = pos_max;
+            direction = 0;
+            pos_max += 0.5f;
+        }
+    } else if(direction == 0) {
+        pos -= 0.05;
+        if(pos <= 1) {
+            if(pos_max > 15) pos_max = 1.0f;
+            direction = 1;
+        }
+    }
+}
+
+void ac::imageBlendTwo(cv::Mat &frame) {
+    static double pos = 1.0f;
+    if(blend_set == true) {
+        int i,z;
+        for(i = 0; i < frame.cols; ++i) {
+            for(z = 0; z < frame.rows; ++z) {
+                int cX = AC_GetFX(blend_image.cols, i, frame.cols);
+                int cY = AC_GetFZ(blend_image.rows, z, frame.rows);
+                cv::Vec3b &current = frame.at<cv::Vec3b>(z, i);
+                cv::Vec3b im = blend_image.at<cv::Vec3b>(cY, cX);
+                current[0] = im[0]+(current[0]*pos);
+                current[1] = im[1]+(current[1]*pos);
+                current[2] = im[2]+(current[2]*pos);
+                swapColors(frame, z, i);
+                if(isNegative) invert(frame, z, i);
+            }
+        }
+    }
+    static int direction = 1;
+    static double pos_max = 7.0f;
+    if(direction == 1) {
+        pos += 0.05;
+        if(pos > pos_max) {
+            pos = pos_max;
+            direction = 0;
+            pos_max += 0.5f;
+        }
+    } else if(direction == 0) {
+        pos -= 0.05;
+        if(pos <= 1) {
+            if(pos_max > 15) pos_max = 1.0f;
+            direction = 1;
+        }
+    }
+}
+
+void ac::imageBlendThree(cv::Mat &frame) {
+    if(blend_set == true) {
+        static double pos = 1.0f;
+        for(int i = 0; i < frame.cols; ++i) {
+            for(int z = 0; z < frame.rows; ++z) {
+                int cX = AC_GetFX(blend_image.cols, i, frame.cols);
+                int cY = AC_GetFZ(blend_image.rows, z, frame.rows);
+                cv::Vec3b &pixel = frame.at<cv::Vec3b>(z, i);
+                cv::Vec3b im = blend_image.at<cv::Vec3b>(cY, cX);
+                pixel[0] += (pixel[0]^im[0]);
+                pixel[1] += (pixel[1]^im[1]);
+                pixel[2] += (pixel[2]^im[2])*pos;
+                swapColors(frame, z, i);
+                if(isNegative) invert(frame, z, i);
+                
+            }
+        }
+        static int direction = 1;
+        static double pos_max = 7.0f;
+        if(direction == 1) {
+            pos += 0.005;
+            if(pos > pos_max) {
+                pos = pos_max;
+                direction = 0;
+                pos_max += 0.5f;
+            }
+        } else if(direction == 0) {
+            pos -= 0.005;
+            if(pos <= 1) {
+                if(pos_max > 15) pos_max = 1.0f;
+                direction = 1;
+            }
+        }
+    }
+}
+
+void ac::GaussianBlur(cv::Mat &frame) {
+    cv::Mat out;
+    cv::GaussianBlur(frame, out, cv::Size(5, 5), 0, 0);
+    frame = out;
+}
+
+void ac::MedianBlur(cv::Mat &frame) {
+    cv::Mat out;
+    cv::medianBlur(frame, out, 5);
+    frame = out;
+}
+
+void ac::BlurDistortion(cv::Mat &frame) {
+    cv::Mat out;
+    static unsigned int index = 1, direction = 1;
+    cv::GaussianBlur(frame, out, cv::Size(index, index), 0, 0);
+    if(direction == 1) {
+    	if(index >= 51) direction = 0;
+    	else index += 2;
+    } else {
+        if(index <= 1) direction = 1;
+        else index -= 2;
+    }
+    frame = out;
+}
+
+void ac::DiamondPattern(cv::Mat &frame) {
+    static double pos = 1.0;
+    int w = frame.cols;
+    int h = frame.rows;
+    for(int z = 0; z < h; ++z) {
+        for(int i = 0; i < w; ++i) {
+            cv::Vec3b &buffer = frame.at<cv::Vec3b>(z, i);
+            if((i%2) == 0) {
+                if((z%2) == 0) {
+                    buffer[0] = 1-pos*buffer[0];
+                    buffer[2] = (i+z)*pos;
+                } else {
+                    buffer[0] = pos*buffer[0]-z;
+                    buffer[2] = (i-z)*pos;
+                }
+            } else {
+                if((z%2) == 0) {
+                    buffer[0] = pos*buffer[0]-i;
+                    buffer[2] = (i-z)*pos;
+                } else {
+                    buffer[0] = pos*buffer[0]-z;
+                    buffer[2] = (i+z)*pos;
+                }
+            }
+            swapColors(frame, z, i);
+            if(isNegative) invert(frame, z, i);
+        }
+    }
+    static int direction = 1;
+    static double pos_max = 7.0f;
+    if(direction == 1) {
+        pos += 0.05;
+        if(pos > pos_max) {
+            pos = pos_max;
+            direction = 0;
+            pos_max += 0.5f;
+        }
+    } else if(direction == 0) {
+        pos -= 0.05;
+        if(pos <= 1.0) {
+            if(pos_max > 15) pos_max = 1.0f;
+            direction = 1;
+        }
+    }
+}
+
+void ac::MirrorBlend(cv::Mat &frame) {
+    static double pos = 1.0;
+    int w = frame.cols;
+    int h = frame.rows;
+    cv::Mat orig;
+    orig = frame.clone();
+    for(int z = 2; z < h-3; ++z) {
+        for(int i = 2; i < w-3; ++i) {
+            cv::Vec3b &buffer = frame.at<cv::Vec3b>(z, i);
+            cv::Vec3b &pix1 = orig.at<cv::Vec3b>((h-z), (w-i));
+            buffer[0] += pix1[0]*pos;
+            buffer[1] += pix1[1]*pos;
+            buffer[2] += pix1[2]*pos;
+            swapColors(frame, z, i);
+            if(isNegative) invert(frame, z, i);
+        }
+    }
+    static int direction = 1;
+    static double pos_max = 2.0f;
+    if(direction == 1) {
+        pos += 0.1;
+        if(pos > pos_max) {
+            pos = pos_max;
+            direction = 0;
+            pos_max += 1.0f;
+        }
+    } else if(direction == 0) {
+        pos -= 0.1;
+        if(pos <= 1.0) {
+            if(pos_max > 2.0f) pos_max = 1.0f;
+            direction = 1;
+        }
+    }
+}
+
+void ac::Pulse(cv::Mat &frame) {
+    static double pos = 1.0;
+    int w = frame.cols;
+    int h = frame.rows;
+    for(int z = 0; z < h; ++z) {
+        for(int i = 0; i < w; ++i) {
+            cv::Vec3b &buffer = frame.at<cv::Vec3b>(z, i);
+            buffer[0] += buffer[0]*pos;
+            buffer[1] += buffer[1]*pos;
+            buffer[2] += buffer[2]*pos;
+            swapColors(frame, z, i);
+            if(isNegative) invert(frame, z, i);
+        }
+    }
+    static int direction = 1;
+    static double pos_max = 3.0f;
+    if(direction == 1) {
+        pos += 0.1;
+        if(pos > pos_max) {
+            pos = pos_max;
+            direction = 0;
+            pos_max += 1.0f;
+        }
+    } else if(direction == 0) {
+        pos -= 0.1;
+        if(pos <= 1.0) {
+            if(pos_max > 3.0f) pos_max = 1.0f;
+            direction = 1;
+        }
+    }
+}
+
+void ac::SidewaysMirror(cv::Mat &frame) {
+    static double pos = 1.0;
+    int w = frame.cols;
+    int h = frame.rows;
+    cv::Mat orig;
+    orig = frame.clone();
+    for(int z = 2; z < h-3; ++z) {
+        for(int i = 2; i < w-3; ++i) {
+            cv::Vec3b &buffer = frame.at<cv::Vec3b>(z, i);
+            cv::Vec3b &pix1 = orig.at<cv::Vec3b>((h-z), (w-i));
+            cv::Vec3b &pix2 = orig.at<cv::Vec3b>(z, (w-i));
+            buffer[0] += (pix1[0]+pix2[0])*pos;
+            buffer[1] += (pix1[1]+pix2[1])*pos;
+            buffer[2] += (pix1[2]+pix2[2])*pos;
+            swapColors(frame, z, i);
+            if(isNegative) invert(frame, z, i);
+        }
+    }
+    static int direction = 1;
+    static double pos_max = 4.0f;
+    if(direction == 1) {
+        pos += 0.1;
+        if(pos > pos_max) {
+            pos = pos_max;
+            direction = 0;
+            pos_max += 1.0f;
+        }
+    } else if(direction == 0) {
+        pos -= 0.1;
+        if(pos <= 1.0) {
+            if(pos_max > 4.0f) pos_max = 1.0f;
+            direction = 1;
+        }
+    }
+}
+
+void ac::MirrorNoBlend(cv::Mat &frame) {
+    static double pos = 1.0;
+    int w = frame.cols;
+    int h = frame.rows;
+    cv::Mat orig;
+    orig = frame.clone();
+    for(int z = 2; z < h-3; ++z) {
+        for(int i = 2; i < w-3; ++i) {
+            cv::Vec3b &buffer = frame.at<cv::Vec3b>(z, i);
+            cv::Vec3b &pix1 = orig.at<cv::Vec3b>((h-z), (w-i));
+            cv::Vec3b &pix2 = orig.at<cv::Vec3b>(z, (w-i));
+            cv::Vec3b &pix3 = orig.at<cv::Vec3b>((h-z), i);
+             buffer[0] = (pix1[0]+pix2[0]+pix3[0]);
+             buffer[1] = (pix1[1]+pix2[1]+pix3[1]);
+             buffer[2] = (pix1[2]+pix2[2]+pix3[2]);
+            swapColors(frame, z, i);
+            if(isNegative) invert(frame, z, i);
+        }
+    }
+    static int direction = 1;
+    static double pos_max = 4.0f;
+    if(direction == 1) {
+        pos += 0.1;
+        if(pos > pos_max) {
+            pos = pos_max;
+            direction = 0;
+            pos_max += 1.0f;
+        }
+    } else if(direction == 0) {
+        pos -= 0.1;
+        if(pos <= 1.0) {
+            if(pos_max > 4.0f) pos_max = 1.0f;
+            direction = 1;
+        }
+    }
+}
+
 void ac::custom(cv::Mat &frame) {
     custom_filter(frame);
 }
-
-
-
-
-
