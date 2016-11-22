@@ -40,6 +40,8 @@ void BlurFirst(int pos, void *ptr);
 void BlurSecond(int pos, void *ptr);
 
 inline std::string boolStr(bool b) { if(b) return "True"; return "False"; };
+cv::Mat blend_image;
+bool blend_set = false;
 
 int main(int argc, char **argv) {
 
