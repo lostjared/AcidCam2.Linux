@@ -155,20 +155,10 @@ int main(int argc, char **argv) {
 
 		int slider_value = 0, slider_neg = 0, slider_neg_f = 0, slider_pass2 = 0, slider_rev = 0, slider_show = 0, slider_rand = 0, slider_strobe = 0, slider_blur_f = 0, slider_blur_s = 0;
 		cv::namedWindow("Acid Cam v2", 1);
-		//cv::namedWindow("Controls");
-		cv::createTrackbar("Change Filter", "Acid Cam v2",&slider_value, ac::draw_max, TrackbarCallback);		
-		/*cv::createTrackbar("Filter Negative", "Controls", &slider_neg, 1, IsNegativeCallback);
-		cv::createTrackbar("Negative Flash", "Controls", &slider_neg_f,1, IsNegativeFlash);
-		cv::createTrackbar("Reverse Colors", "Controls", &slider_rev, 1, ReverseColors);
-		cv::createTrackbar("Slide Show", "Controls", &slider_show, 1, SlideShow);
-		cv::createTrackbar("Slide Rand", "Controls", &slider_rand, 1, SlideRand);
-		cv::createTrackbar("Strobe ", "Controls", &slider_strobe, 1, StrobeIt);
-		cv::createTrackbar("Blur First", "Controls", &slider_blur_f, 1, BlurFirst);
-		cv::createTrackbar("Blur Second", "Controls", &slider_blur_s, 1, BlurSecond);
-		cv::createTrackbar("Pass 2 Enable", "Controls", &slider_pass2,1,Pass2Enable);*/
-		bool active = true;
+		cv::createTrackbar("Change Filter", "Acid Cam v2",&slider_value, ac::draw_max, TrackbarCallback);
+
+        bool active = true;
 		int key = 0x0;
-		//cv::moveWindow("Controls", 0, 0);
 
 		while(active == true) {
 			cv::Mat frame;
@@ -185,7 +175,6 @@ int main(int argc, char **argv) {
 			}
 
 			if( (key = cv::waitKey(30)) ) {
-				//std::cout << "Keypressed: " << (key & 0xff) << "\n";
 				
 				#ifdef __linux__
 				key = key & 0xff;
@@ -221,26 +210,18 @@ int main(int argc, char **argv) {
 					break;
 				case 'l':
 					std::cout << "Draw Offset Increased\n";
+                        if(ac::draw_offset < ac::draw_max)
+                            ++ac::draw_offset;
                         
                         if(ac::draw_strings[ac::draw_offset] == "Alpha Flame Filters") {
-                            if(current_filterx < 36) {
-                                ++current_filterx;
-                                break;
-                            } else ++ac::draw_offset;
+                            std::cout << "Press y/u to move through Alpha Flame Filters\n";
                         }
                         
-					if(ac::draw_offset < ac::draw_max)
-						++ac::draw_offset;
-
-					std::cout << "Filter set to: " << ac::draw_strings[ac::draw_offset] << "\n";
+                        std::cout << "Filter set to: " << ac::draw_strings[ac::draw_offset] << "\n";
 					break;
 				case 'o':
                         
-                        if(ac::draw_strings[ac::draw_offset] == "Alpha Flame Filters") {
-                            if(current_filterx > 0) --current_filterx;
-                                else if(ac::draw_offset > 0) ac::draw_offset--;
-                            break;
-                        }
+                        if(ac::draw_offset > 0) --ac::draw_offset;
                         
 					std::cout << "Draw Offset Decreased\n";
 					if(ac::draw_offset > 0)
