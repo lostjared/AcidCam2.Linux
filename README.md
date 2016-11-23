@@ -17,12 +17,12 @@ $ make
 if your having trouble compiling you don't really need
 to call the configure script just enter the code subdirectory and use
 
-make -f Makefile.linux
+$ make -f Makefile.linux
 
 
 pass a path to configure if OpenCV 3 is installed somewhere else example
 
-./configure --prefix=/opt/local
+$ ./configure --prefix=/opt/local
 
 Command line arguments:
 
