@@ -3,7 +3,7 @@
  * written by Jared Bruni ( http://lostsidedead.com )
  * GPL
  *
- *	 ac2 arguments:
+ *	 AC2 arguments:
  *	 -t transition [Transition variable]
  *	 -l input_file.avi [Use video instead of camera]
  *	 -d device [Capture device index]
@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
 				writer.write(frame);
 			}
 
-			if( (key = cv::waitKey(30)) ) {
+			if( (key = cv::waitKey(5)) ) {
 				
 				#ifdef __linux__
 				key = key & 0xff;
