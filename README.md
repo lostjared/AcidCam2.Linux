@@ -8,9 +8,11 @@ On Debian Linux install the package libopencv-dev
 then
 To compile use
 
-./configure
+$ ./autogen.sh
 
-make
+$ ./configure
+
+$ make
 
 if your having trouble compiling you don't really need
 to call the configure script just enter the code subdirectory and use
@@ -62,4 +64,8 @@ Keys
 
 'o' filter decreased (Next filter)
 
+
+example:
+
+$ AcidCam2 -x -l /home/jared/Pictures/video.mp4 -i /home/jared/Pictures/photo.jpg
 
