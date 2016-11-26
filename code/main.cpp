@@ -175,6 +175,9 @@ int main(int argc, char **argv) {
 				#endif
 
 				switch(key) {
+                case 27:
+                        active = false;
+                        continue;
 				case 't':
 					ac::resetAll();
 					break;
