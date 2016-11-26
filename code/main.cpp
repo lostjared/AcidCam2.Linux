@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
 			std::cout << "Recording disabled ..\n";
 
 		int slider_value = 0, slider_neg = 0, slider_neg_f = 0, slider_pass2 = 0, slider_rev = 0, slider_show = 0, slider_rand = 0, slider_strobe = 0, slider_blur_f = 0, slider_blur_s = 0;
-		cv::namedWindow("Acid Cam v2", 1);
+		cv::namedWindow("Acid Cam v2 [Press Escape to Quit]", 1);
 		cv::createTrackbar("Change Filter", "Acid Cam v2",&slider_value, ac::draw_max, TrackbarCallback);
 
         bool active = true;
@@ -162,7 +162,7 @@ int main(int argc, char **argv) {
 			}
 			ProcFrame(frame);
 			++frame_count;
-			imshow("Acid Cam v2", frame);
+			imshow("Acid Cam v2 [Press Escape to Quit]", frame);
 
 			if(ac::noRecord == false) {
 				writer.write(frame);
