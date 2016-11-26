@@ -29,15 +29,7 @@
 void ProcFrame(cv::Mat &frame);
 void BuildImages(std::string filename);
 void TrackbarCallback(int pos, void *ptr);
-void IsNegativeCallback(int pos, void *ptr);
-void IsNegativeFlash(int pos, void *ptr);
-void Pass2Enable(int pos, void *ptr);
-void ReverseColors(int pos, void *ptr);
-void SlideShow(int pos, void *ptr);
-void SlideRand(int pos, void *ptr);
-void StrobeIt(int pos, void *ptr);
-void BlurFirst(int pos, void *ptr);
-void BlurSecond(int pos, void *ptr);
+
 
 inline std::string boolStr(bool b) { if(b) return "True"; return "False"; };
 cv::Mat blend_image;
@@ -231,53 +223,7 @@ int main(int argc, char **argv) {
 
 					std::cout << "Filter set to: " << ac::draw_strings[ac::draw_offset] << "\n";;
 					break;
-				case 'n':
-					ac::isNegative = !ac::isNegative;
-					std::cout << "Is Negative: " << boolStr(ac::isNegative) << "\n";
-					break;
-				case 'r':
-					ac::iRev = !ac::iRev;
-					if(ac::iRev == true) ac::isNegative = true;
-					std::cout << "Reverse Colors: " << boolStr(ac::iRev) << "\n";
-					break;
-				case 27:
-					active = false;
-					std::cout << "Quitting..\n";
-					break;
-				case 'p':
-					ac::pass2_enabled = !ac::pass2_enabled;
-					std::cout << "Pass2 Enabled: "<< boolStr(ac::pass2_enabled) <<  "\n";
-					break;
-				case 'h':
-					ac::slide_Show = !ac::slide_Show;
-					std::cout << "Slide Show: " <<  boolStr(ac::slide_Show) << "\n";
-					break;
-				case 'j':
-					ac::slide_Rand = !ac::slide_Rand;
-					std::cout << "Slide Show Random: " << boolStr(ac::slide_Rand) << "\n";
-					break;
-				case 'b':
-					ac::strobe_It = !ac::strobe_It;
-					std::cout << "Strobe It: " << boolStr(ac::strobe_It) << "\n";
-					break;
-				case 'c':
-					if(ac::switch_Back == true) {
-						ac::switch_Back = false;
-					} else {
-						ac::switch_Back = true;
-						ac::isNegative = false;
-					}
-					std::cout << "switch: " << boolStr(ac::switch_Back) << "\n" << "is Negative: " << boolStr(ac::isNegative) << "\n";
-					break;
-				case 'f':
-					ac::blur_First = !ac::blur_First;
-					std::cout << "Blur First: " << boolStr(ac::blur_First) << "\n";
-					break;
-				case 'g':
-					ac::blur_Second = !ac::blur_Second;
-					std::cout << "Blur Second: " << boolStr(ac::blur_Second) << "\n";
-					break;
-                case 'y':
+		        case 'y':
                         if(current_filterx < 36)
                         current_filterx++;
                         break;
@@ -303,65 +249,6 @@ int main(int argc, char **argv) {
 void TrackbarCallback(int pos, void *ptr) {
 	ac::draw_offset = pos;
 	std::cout << "Filter set to: " << ac::draw_strings[ac::draw_offset] << "\n";;
-}
-
-void IsNegativeCallback(int pos, void *ptr) {
-	if(pos == 1) ac::isNegative = true;
-	else ac::isNegative = false;
-	std::cout << "isNegative: " << boolStr(ac::isNegative) << "\n";
-}
-
-void IsNegativeFlash(int pos, void *ptr) {
-	if(ac::switch_Back == true) {
-		ac::switch_Back = false;
-	} else {
-		ac::switch_Back = true;
-		ac::isNegative = false;
-	}
-	std::cout << "switch: " << boolStr(ac::switch_Back) << "\n" << "is Negative: " << boolStr(ac::isNegative) << "\n";
-}
-
-void Pass2Enable(int pos, void *ptr) {
-	if(pos == 1) ac::pass2_enabled = true;
-	else ac::pass2_enabled = false;
-	std::cout << "Pass2 Enabled: "<< boolStr(ac::pass2_enabled) <<  "\n";
-}
-
-void ReverseColors(int pos, void *ptr) {
-	if(pos == 1) ac::iRev = true;
-	else ac::iRev = false;
-
-	if(ac::iRev == true) ac::isNegative = true;
-	std::cout << "Reverse Colors: " << boolStr(ac::iRev) << "\n";
-}
-
-void SlideShow(int pos, void *ptr) {
-	if(pos == 1) ac::slide_Show = true;
-	else ac::slide_Show = false;
-	std::cout << "Slide Show: " <<  boolStr(ac::slide_Show) << "\n";
-}
-
-void SlideRand(int pos, void *ptr) {
-	if(pos == 1) ac::slide_Rand = true;
-	else ac::slide_Rand = false;
-	std::cout << "Slide Show Random: " << boolStr(ac::slide_Rand) << "\n";
-}
-
-void StrobeIt(int pos, void *ptr) {
-	if(pos == 1) ac::strobe_It = true;
-	else ac::strobe_It = false;
-	std::cout << "Strobe It: " << boolStr(ac::strobe_It) << "\n";
-}
-
-void BlurFirst(int pos, void *ptr) {
-	if(pos == 1) ac::blur_First = true;
-	else ac::blur_First = false;
-	std::cout << "Blur First set to: " << boolStr(ac::blur_First) << "\n";
-}
-void BlurSecond(int pos, void *ptr) {
-	if(pos == 1) ac::blur_Second = true;
-	else ac::blur_Second = false;
-	std::cout << "Blur Second set to: " << boolStr(ac::blur_Second) << "\n";
 }
 
 void custom_filter(cv::Mat &frame) {
