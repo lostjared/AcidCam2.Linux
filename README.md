@@ -1,5 +1,8 @@
 # AcidCam2.Linux
 
+![AnimatedImage](http://lostsidedead.biz/gif/jaredpeace.gif "screenshot")
+
+
 ![ScreenShot](http://lostsidedead.biz/acidcam/acidcam-linux.png "screenshot")
 
 
