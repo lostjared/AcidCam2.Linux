@@ -13,6 +13,7 @@
 #include<cstdlib>
 #include<ctime>
 #include<cmath>
+#include<algorithm>
 #include "opencv2/opencv.hpp"
 /*
  * to use set appropriate variables, call the function
@@ -30,12 +31,16 @@
  * ac::draw_strings[function_index];
  *
  */
+
+// exernal variables
 extern int current_filterx, bytesPerSample, bytesPerRow, width, height, red, green, blue, offset, randomNumber, reverse;
 extern bool negate, blend_set;
 extern cv::Mat blend_image;
 
+// acid cam namespace
 namespace ac {
-    static const std::string version="2.0.28";
+    // version string
+    static const std::string version="2.0.29";
     extern double translation_variable, pass2_alpha;
     extern double alpha, tr;
     extern bool isNegative, noRecord,pass2_enabled,blendW,slide_Show,slide_Rand,strobe_It,switch_Back,blur_First,blur_Second,iRev;
@@ -54,6 +59,7 @@ namespace ac {
     inline void randAlpha(double &value);
     void resetAll();
     void enablePass2(bool pass2_enabled, bool pass2_alpha);
+    /* filter functions */
     typedef void (*DrawFunction)(cv::Mat &frame);
     void SelfAlphaBlend(cv::Mat &frame);
     void SelfScale(cv::Mat &frame);
@@ -101,6 +107,11 @@ namespace ac {
     void Pulse(cv::Mat &frame);
     void SidewaysMirror(cv:: Mat &frame);
     void MirrorNoBlend(cv::Mat &frame);
+    void SortFuzz(cv::Mat &frame);
+    void Fuzz(cv::Mat &frame);
+    void DoubleVision(cv::Mat &frame);
+    void RGBShift(cv::Mat &frame);
+    void RGBSep(cv::Mat &frame);
     void plugin(cv::Mat &frame);
     // draw functions / strings
     extern std::string draw_strings[];
@@ -108,7 +119,7 @@ namespace ac {
     extern int draw_max;
     extern bool snapShot;
 }
-
+// custom filter function, must be defined in program so it will link
 extern void custom_filter(cv::Mat &frame);
 
 #endif

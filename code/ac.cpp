@@ -9,7 +9,9 @@
 #include "ac.h"
 #include "fractal.h"
 
+// acid cam namespace
 namespace ac {
+    // variables
     bool isNegative = false, noRecord = false, pass2_enabled = false, blendW = false, slide_Show = false, slide_Rand = false, strobe_It = false, switch_Back = false, blur_First = false;
     bool images_Enabled = false, fps_force = false,iRev = false;
     bool blur_Second = false;
@@ -23,12 +25,17 @@ namespace ac {
     int color_order = 0;
     int snapshot_Type = 0;
     
-    std::string draw_strings[] = { "Self AlphaBlend", "Self Scale", "StrobeEffect", "Blend #3", "Negative Paradox", "ThoughtMode", "RandTriBlend", "Blank", "Tri", "Distort", "CDraw", "Type", "NewOne", "Blend Fractal","Blend Fractal Mood", "CosSinMultiply", "Color Accumlate1", "Color Accumulate2", "Color Accumulate3", "filter8","filter3","Rainbow Blend","Rand Blend","New Blend", "Alpha Flame Filters", "Pixel Scale", "PixelSort", "GlitchSort","Random Filter", "Blend with Image", "Blend with Image #2", "Blend with Image #3", "GaussianBlur", "Median Blur", "Blur Distortion", "Diamond Pattern", "MirrorBlend","Pulse","Sideways Mirror","Mirror No Blend","Plugin", "Custom","Blend With Image #1",  "TriBlend with Image", "Image Strobe", "Image distraction" };
+    // draw strings (function names)
+    std::string draw_strings[] = { "Self AlphaBlend", "Self Scale", "StrobeEffect", "Blend #3", "Negative Paradox", "ThoughtMode", "RandTriBlend", "Blank", "Tri", "Distort", "CDraw", "Type", "NewOne", "Blend Fractal","Blend Fractal Mood", "CosSinMultiply", "Color Accumlate1", "Color Accumulate2", "Color Accumulate3", "filter8","filter3","Rainbow Blend","Rand Blend","New Blend", "Alpha Flame Filters", "Pixel Scale", "PixelSort", "GlitchSort","Random Filter", "Blend with Image", "Blend with Image #2", "Blend with Image #3", "GaussianBlur", "Median Blur", "Blur Distortion", "Diamond Pattern", "MirrorBlend","Pulse","Sideways Mirror","Mirror No Blend","Sort Fuzz","Fuzz","Double Vision","RGB Shift","RGB Sep","Plugin", "Custom","Blend With Image #1",  "TriBlend with Image", "Image Strobe", "Image distraction" };
 
+    // filter callback functions
     DrawFunction draw_func[] = { SelfAlphaBlend, SelfScale, StrobeEffect, Blend3, NegParadox, ThoughtMode, RandTriBlend, Blank, Tri, Distort, CDraw,Type,NewOne,blendFractal,blendFractalMood,cossinMultiply, colorAccumulate1, colorAccumulate2, colorAccumulate3,filter8,filter3,rainbowBlend,randBlend,newBlend,
-        alphaFlame, pixelScale,pixelSort, glitchSort,randomFilter,imageBlend,imageBlendTwo,imageBlendThree,GaussianBlur, MedianBlur, BlurDistortion,DiamondPattern,MirrorBlend,Pulse,SidewaysMirror,MirrorNoBlend,plugin,custom,blendWithImage, triBlendWithImage,imageStrobe, imageDistraction,0};
-    int draw_max = 45;
+        alphaFlame, pixelScale,pixelSort, glitchSort,randomFilter,imageBlend,imageBlendTwo,imageBlendThree,GaussianBlur, MedianBlur, BlurDistortion,DiamondPattern,MirrorBlend,Pulse,SidewaysMirror,MirrorNoBlend,SortFuzz,Fuzz,DoubleVision,RGBShift,RGBSep,plugin,custom,blendWithImage, triBlendWithImage,imageStrobe, imageDistraction,0};
+    // number of filters
+    int draw_max = 50;
+    // variables
     double translation_variable = 0.001f, pass2_alpha = 0.75f;
+    // swap colors inline function
     inline void swapColors(cv::Mat &frame, int x, int y);
 }
 
@@ -105,7 +112,6 @@ void ac::resetAll() {
     isNegative = false;
     blur_Second = false;
 }
-
 
 void ac::enablePass2(bool pass2_enabled, bool pass2_alpha) {
     ac::pass2_enabled = pass2_enabled;
@@ -1830,6 +1836,164 @@ void ac::MirrorNoBlend(cv::Mat &frame) {
         if(pos <= 1.0) {
             if(pos_max > 4.0f) pos_max = 1.0f;
             direction = 1;
+        }
+    }
+}
+
+void ac::SortFuzz(cv::Mat &frame) {
+    unsigned int r = rand()%255;
+    int w = frame.cols;
+    int h = frame.rows;
+    static std::vector<unsigned int> v;
+    v.reserve(w);
+    for(int z = 0; z < h; ++z) {
+        for(int i = 0; i < w; ++i) {
+            cv::Vec3b &value = frame.at<cv::Vec3b>(z, i);
+            unsigned int vv = 0;
+            unsigned char *cv = (unsigned char*)&vv;
+            cv[0] = value[0];
+            cv[1] = value[1];
+            cv[2] = value[2];
+            cv[3] = 0;
+            v.push_back(vv);
+        }
+        std::sort(v.begin(), v.end(), std::greater<int>());
+        for(int i = 0; i < w; ++i) {
+            unsigned char *value = (unsigned char*)&v[i];
+            cv::Vec3b &pixel = frame.at<cv::Vec3b>(z, i);
+            pixel[0] += value[0]+r;
+            pixel[1] += value[1]+r;
+            pixel[2] += value[2]+r;
+            swapColors(frame, z, i);
+            if(isNegative) invert(frame, z, i);
+            
+        }
+        v.erase(v.begin(), v.end());
+    }
+}
+
+void ac::Fuzz(cv::Mat &frame) {
+    int w = frame.cols;
+    int h = frame.rows;
+    static int amount = 5;
+    for(int z = 0; z < h; ++z) {
+        for(int i = 0; i < w; ++i) {
+            if((rand()%amount)==1) {
+                cv::Vec3b &pixel = frame.at<cv::Vec3b>(z, i);
+                pixel[0] += rand()%255;
+                pixel[1] += rand()%255;
+                pixel[2] += rand()%255;
+            }
+            swapColors(frame, z, i);
+            if(isNegative) invert(frame, z, i);
+        }
+    }
+    static int direction = 1;
+    if(direction == 1) {
+        ++amount;
+        if(amount >= 10) direction = 0;
+    } else {
+        --amount;
+        if(amount <= 5) direction = 1;
+    }
+}
+
+void ac::DoubleVision(cv::Mat &frame) {
+    static double pos = 1.0;
+    int w = frame.cols;
+    int h = frame.rows;
+    cv::Mat orig = frame.clone();
+    for(int z = 3; z < h-3; ++z) {
+        for(int i = 3; i < w-3; ++i) {
+            cv::Vec3b &buffer = frame.at<cv::Vec3b>(z, i);
+            cv::Vec3b &g = orig.at<cv::Vec3b>((h-z), i);
+            cv::Vec3b &b = orig.at<cv::Vec3b>(z, (w-i));
+            if((i%2) == 0) {
+                if((z%2) == 0) {
+                    buffer[2] += (i+z)*pos;
+                } else {
+                    buffer[2] += (i-z)*pos;
+                }
+            } else {
+                if((z%2) == 0) {
+                    buffer[2] += (i-z)*pos;
+                } else {
+                    buffer[2] += (i+z)*pos;
+                }
+            }
+            buffer[0] += g[0];
+            buffer[1] += b[1];
+                                            
+            swapColors(frame, z, i);
+            if(isNegative) invert(frame, z, i);
+        }
+    }
+    static int direction = 1;
+    static double pos_max = 7.0f;
+    if(direction == 1) {
+        pos += 0.05;
+        if(pos > pos_max) {
+            pos = pos_max;
+            direction = 0;
+            pos_max += 0.5f;
+        }
+    } else if(direction == 0) {
+        pos -= 0.05;
+        if(pos <= 1.0) {
+            if(pos_max > 15) pos_max = 1.0f;
+            direction = 1;
+        }
+    }
+}
+
+void ac::RGBShift(cv::Mat &frame) {
+    int w = frame.cols;
+    int h = frame.rows;
+    cv::Mat orig = frame.clone();
+    static int shift = 0;
+    for(int z = 3; z < h-3; ++z) {
+        for(int i = 3; i < w-3; ++i) {
+            cv::Vec3b &buffer = frame.at<cv::Vec3b>(z, i);
+            cv::Vec3b &g = orig.at<cv::Vec3b>((h-z), i);
+            cv::Vec3b &b = orig.at<cv::Vec3b>(z, (w-i));
+            cv::Vec3b &r = orig.at<cv::Vec3b>((h-z), (w-i));
+            switch(shift) {
+                case 0:
+                    buffer[0] += r[0];
+                    buffer[1] += g[1];
+                    buffer[2] += b[2];
+                case 1:
+                    break;
+                    buffer[0] += g[0];
+                    buffer[1] += b[1];
+                    buffer[2] += r[2];
+                case 2:
+                    buffer[0] += b[0];
+                    buffer[1] += r[1];
+                    buffer[2] += g[2];
+                    break;
+            }
+            swapColors(frame, z, i);
+            if(isNegative) invert(frame, z, i);
+        }
+    }
+    ++shift;
+    if(shift > 2) shift = 0;
+}
+
+void ac::RGBSep(cv::Mat &frame) {
+    int w = frame.cols;
+    int h = frame.rows;
+    cv::Mat orig = frame.clone();
+    for(int z = 3; z < h-3; ++z) {
+        for(int i = 3; i < w-3; ++i) {
+            cv::Vec3b &buffer = frame.at<cv::Vec3b>(z, i);
+            cv::Vec3b &g = orig.at<cv::Vec3b>((h-z), i);
+            cv::Vec3b &b = orig.at<cv::Vec3b>(z, (w-i));
+            buffer[0] += g[0];
+            buffer[2] += b[2];
+            swapColors(frame, z, i);
+            if(isNegative) invert(frame, z, i);
         }
     }
 }
