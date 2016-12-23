@@ -40,10 +40,10 @@ extern cv::Mat blend_image;
 // acid cam namespace
 namespace ac {
     // version string
-    static const std::string version="2.0.29";
+    static const std::string version="2.1.0";
     extern double translation_variable, pass2_alpha;
     extern double alpha, tr;
-    extern bool isNegative, noRecord,pass2_enabled,blendW,slide_Show,slide_Rand,strobe_It,switch_Back,blur_First,blur_Second,iRev;
+    extern bool isNegative, noRecord,iRev;
     extern int color_order;
     extern double fps;
     extern int draw_offset;
@@ -56,11 +56,10 @@ namespace ac {
     inline int GetFX(cv::Mat &frame, int x, int nw);
     inline int GetFY(cv::Mat &frame, int y, int nh);
     inline void invert(cv::Mat &frame, int x, int y);
-    inline void randAlpha(double &value);
-    void resetAll();
-    void enablePass2(bool pass2_enabled, bool pass2_alpha);
     /* filter functions */
     typedef void (*DrawFunction)(cv::Mat &frame);
+    
+    // Acid Cam Filter Function prototypes
     void SelfAlphaBlend(cv::Mat &frame);
     void SelfScale(cv::Mat &frame);
     void StrobeEffect(cv::Mat &frame);
@@ -96,9 +95,11 @@ namespace ac {
     void glitchSort(cv::Mat &frame);
     void pixelSort(cv::Mat &frame);
     void randomFilter(cv::Mat &frame);
+    void randomFlash(cv::Mat &frame);
     void imageBlend(cv::Mat &frame);
     void imageBlendTwo(cv::Mat &frame);
     void imageBlendThree(cv::Mat &frame);
+    void imageBlendFour(cv::Mat &frame);
     void GaussianBlur(cv::Mat &frame);
     void MedianBlur(cv::Mat &frame);
     void BlurDistortion(cv::Mat &frame);
@@ -112,6 +113,10 @@ namespace ac {
     void DoubleVision(cv::Mat &frame);
     void RGBShift(cv::Mat &frame);
     void RGBSep(cv::Mat &frame);
+    void GradientRainbow(cv::Mat &frame);
+    void GradientRainbowFlash(cv::Mat &frame);
+    void Reverse(cv::Mat &frame);
+    void BlendWithSource(cv::Mat &frame);
     void plugin(cv::Mat &frame);
     // draw functions / strings
     extern std::string draw_strings[];
