@@ -1,10 +1,13 @@
 /* Acid Cam Functions for OpenCV
  * written by Jared Bruni
  * http://lostsidedead.com
- * (C) 2016 - GPL
+ * (C) 2017 - GPL
  */
 #ifndef __AC_H__
 #define __AC_H__
+#include<opencv2/videoio.hpp>
+#include<opencv2/imgproc.hpp>
+#include<opencv2/highgui.hpp>
 #include<iostream>
 #include<fstream>
 #include<string>
@@ -14,7 +17,7 @@
 #include<ctime>
 #include<cmath>
 #include<algorithm>
-#include "opencv2/opencv.hpp"
+
 /*
  * to use set appropriate variables, call the function
  *
@@ -40,7 +43,7 @@ extern cv::Mat blend_image;
 // acid cam namespace
 namespace ac {
     // version string
-    static const std::string version="2.1.1";
+    static const std::string version="2.1.5";
     extern double translation_variable, pass2_alpha;
     extern double alpha, tr;
     extern bool isNegative, noRecord,iRev;
@@ -53,6 +56,7 @@ namespace ac {
     extern cv::Mat image_files[4];
     extern bool images_Enabled,fps_force;
     extern int snapshot_Type;
+    extern bool in_custom;
     inline int GetFX(cv::Mat &frame, int x, int nw);
     inline int GetFY(cv::Mat &frame, int y, int nh);
     inline void invert(cv::Mat &frame, int x, int y);
@@ -120,6 +124,16 @@ namespace ac {
     void TVStatic(cv::Mat &frame);
     void MirrorAverage(cv::Mat &frame);
     void MirrorAverageMix(cv::Mat &frame);
+    void Mean(cv::Mat &frame);
+    void Laplacian(cv::Mat &frame);
+    void Bitwise_XOR(cv::Mat &frame);
+    void Bitwise_AND(cv::Mat &frame);
+    void Bitwise_OR(cv::Mat &frame);
+    void Equalize(cv::Mat &frame);
+    void ChannelSort(cv::Mat &frame);
+    void Reverse_XOR(cv::Mat &frame);
+    void CombinePixels(cv::Mat &frame);
+    void FlipTrip(cv::Mat &frame);
     void BlendWithSource(cv::Mat &frame);
     void plugin(cv::Mat &frame);
     // draw functions / strings

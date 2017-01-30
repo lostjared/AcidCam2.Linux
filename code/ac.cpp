@@ -3,14 +3,13 @@
  * Acid Cam functions for OpenCV
  * written by Jared Bruni
  * http://lostsidedead.com
- * (C) 2016 under GPL
+ * (C) 2017 under GPL
  * One quick note, most of the time when writing programs using x,y variables x goes first
  * the OpenCV Mat at function that returns a pixel is reversed. 
  * y is first. Example
  * cv::Vec3b &v = frame.at<cv::Vec3b>(y, x);
  *
 */
-
 #include "ac.h"
 #include "fractal.h"
 
@@ -29,24 +28,26 @@ namespace ac {
     bool snapShot = false;
     int color_order = 0;
     int snapshot_Type = 0;
-    
+    bool in_custom = false;
     // draw strings (function names)
-    std::string draw_strings[] = { "Self AlphaBlend", "Self Scale", "StrobeEffect", "Blend #3", "Negative Paradox", "ThoughtMode", "RandTriBlend", "Blank", "Tri", "Distort", "CDraw", "Type", "NewOne", "Blend Fractal","Blend Fractal Mood", "CosSinMultiply", "Color Accumlate1", "Color Accumulate2", "Color Accumulate3", "filter8","filter3","Rainbow Blend","Rand Blend","New Blend", "Alpha Flame Filters", "Pixel Scale", "PixelSort", "GlitchSort","Random Filter", "Random Flash", "Blend with Image", "Blend with Image #2", "Blend with Image #3", "Blend with Image #4", "GaussianBlur", "Median Blur", "Blur Distortion", "Diamond Pattern", "MirrorBlend","Pulse","Sideways Mirror","Mirror No Blend","Sort Fuzz","Fuzz","Double Vision","RGB Shift","RGB Sep","Graident Rainbow","Gradient Rainbow Flash", "Reverse", "Scanlines", "TV Static", "Mirror Average", "Mirror Average Mix", "Blend with Source", "Plugin", "Custom","Blend With Image #1",  "TriBlend with Image", "Image Strobe", "Image distraction" };
+    std::string draw_strings[] = { "Self AlphaBlend", "Self Scale", "StrobeEffect", "Blend #3", "Negative Paradox", "ThoughtMode", "RandTriBlend", "Blank", "Tri", "Distort", "CDraw", "Type", "NewOne", "Blend Fractal","Blend Fractal Mood", "CosSinMultiply", "Color Accumlate1", "Color Accumulate2", "Color Accumulate3", "filter8","filter3","Rainbow Blend","Rand Blend","New Blend", "Alpha Flame Filters", "Pixel Scale", "PixelSort", "GlitchSort","Random Filter", "Random Flash", "Blend with Image", "Blend with Image #2", "Blend with Image #3", "Blend with Image #4", "GaussianBlur", "Median Blur", "Blur Distortion", "Diamond Pattern", "MirrorBlend","Pulse","Sideways Mirror","Mirror No Blend","Sort Fuzz","Fuzz","Double Vision","RGB Shift","RGB Sep","Graident Rainbow","Gradient Rainbow Flash", "Reverse", "Scanlines", "TV Static", "Mirror Average", "Mirror Average Mix", "Mean", "Laplacian", "Bitwise_XOR", "Bitwise_AND", "Bitwise_OR", "Equalize", "Channel Sort", "Reverse_XOR", "Combine Pixels", "FlipTrip", "Blend with Source", "Plugin", "Custom","Blend With Image #1",  "TriBlend with Image", "Image Strobe", "Image distraction" };
 
     // filter callback functions
     DrawFunction draw_func[] = { SelfAlphaBlend, SelfScale, StrobeEffect, Blend3, NegParadox, ThoughtMode, RandTriBlend, Blank, Tri, Distort, CDraw,Type,NewOne,blendFractal,blendFractalMood,cossinMultiply, colorAccumulate1, colorAccumulate2, colorAccumulate3,filter8,filter3,rainbowBlend,randBlend,newBlend,
-        alphaFlame, pixelScale,pixelSort, glitchSort,randomFilter,randomFlash, imageBlend,imageBlendTwo,imageBlendThree,imageBlendFour, GaussianBlur, MedianBlur, BlurDistortion,DiamondPattern,MirrorBlend,Pulse,SidewaysMirror,MirrorNoBlend,SortFuzz,Fuzz,DoubleVision,RGBShift,RGBSep,GradientRainbow,GradientRainbowFlash,Reverse,Scanlines,TVStatic,MirrorAverage,MirrorAverageMix,BlendWithSource,plugin,custom,blendWithImage, triBlendWithImage,imageStrobe, imageDistraction,0};
+        alphaFlame, pixelScale,pixelSort, glitchSort,randomFilter,randomFlash, imageBlend,imageBlendTwo,imageBlendThree,imageBlendFour, GaussianBlur, MedianBlur, BlurDistortion,DiamondPattern,MirrorBlend,Pulse,SidewaysMirror,MirrorNoBlend,SortFuzz,Fuzz,DoubleVision,RGBShift,RGBSep,GradientRainbow,GradientRainbowFlash,Reverse,Scanlines,TVStatic,MirrorAverage,MirrorAverageMix,Mean,Laplacian,Bitwise_XOR,Bitwise_AND,Bitwise_OR,Equalize,ChannelSort,Reverse_XOR,CombinePixels,FlipTrip, BlendWithSource,plugin,custom,blendWithImage, triBlendWithImage,imageStrobe, imageDistraction,0};
     // number of filters
     
-    int draw_max = 60;
+    int draw_max = 69;
     // variables
     double translation_variable = 0.001f, pass2_alpha = 0.75f;
     // swap colors inline function
     inline void swapColors(cv::Mat &frame, int x, int y);
+    inline void procPos(int &direction, double &pos, double &pos_max);
 }
 
 // swapColors inline function takes frame and x, y position
 inline void ac::swapColors(cv::Mat &frame, int x, int y) {
+    if(in_custom == true) return;
     if(color_order == 0) return; // if no swap needed return
     cv::Vec3b &cur = frame.at<cv::Vec3b>(x,y);
     cv::Vec3b temp;// temp
@@ -77,11 +78,35 @@ inline void ac::swapColors(cv::Mat &frame, int x, int y) {
 }
 // invert pixel in frame at x,y
 inline void ac::invert(cv::Mat &frame, int x, int y) {
+    if(in_custom == true) return;
     cv::Vec3b &cur = frame.at<cv::Vec3b>(x,y);// cur pixel
     cur[0] = ~cur[0]; // bit manipulation sets opposite
     cur[1] = ~cur[1];
     cur[2] = ~cur[2];
 }
+
+// proc position
+void ac::procPos(int &direction, double &pos, double &pos_max) {
+    // static int direction
+    // pos max
+    // if direction equals 1
+    if(direction == 1) {
+        pos += 0.05; // pos plus equal 0.05
+        if(pos > pos_max) { // if pos > pos max
+            pos = pos_max; // pos = pos_max
+            direction = 0;// direction equals 0
+            pos_max += 0.5; // pos_max increases by 0.5
+        }
+    } else if(direction == 0) {// direction equals 1
+        pos -= 0.05;// pos -= 0.05
+        if(pos <= 1.0) {// if pos <= 1.0
+            if(pos_max > 15) pos_max = 1.0;// if pos max at maxmium
+            // set to 1.0
+            direction = 1;// set direction back to 1
+        }
+    }
+}
+
 // SelfAlphaBlend - Perform out of Bounds AlphaBlend on source image
 void ac::SelfAlphaBlend(cv::Mat &frame) {
     for(int z = 0; z < frame.rows; ++z) {// from top to bottom
@@ -1020,23 +1045,9 @@ void ac::glitchSort(cv::Mat &frame) {
         }
         v.erase(v.begin(), v.end());// erase pixel data
     }
-    static int direction = 1;// static direction set to 1
     static double pos_max = 7.0f;// pos_max = 7.0
-    if(direction == 1) {// direction equals 1
-        pos += 0.05;// pos plus equal 0.05
-        if(pos > pos_max) {// pos greater than pos_max
-            pos = pos_max;// set pos to pos_max
-            direction = 0;// direction equals 0
-            pos_max += 0.5f;// pos_max plus equal 0.5
-        }
-    } else if(direction == 0) {// direction is 0
-        pos -= 0.05;// pos minus equal 0.05
-        if(pos <= 1) {// pos less than equal 1
-            // if pos_max greater than 15
-            if(pos_max > 15) pos_max = 1.0f;//reset pos_max
-            direction = 1;// set direction back to 1
-        }
-    }
+    static int direction = 1;
+    procPos(direction, pos, pos_max);
 }
 
 // takes cv::Mat reference
@@ -1108,26 +1119,9 @@ void ac::randomFlash(cv::Mat &frame) {
             if(isNegative) invert(frame, z, i);
         }
     }
-    // static int direction
-    static int direction = 1;
-    // pos max
     static double pos_max = 7.0f;
-    // if direction equals 1
-    if(direction == 1) {
-        pos += 0.05; // pos plus equal 0.05
-        if(pos > pos_max) { // if pos > pos max
-            pos = pos_max; // pos = pos_max
-            direction = 0;// direction equals 0
-            pos_max += 0.5f; // pos_max increases by 0.5
-        }
-    } else if(direction == 0) {// direction equals 1
-        pos -= 0.05;// pos -= 0.05
-        if(pos <= 1.0) {// if pos <= 1.0
-            if(pos_max > 15) pos_max = 1.0f;// if pos max at maxmium
-            // set to 1.0
-            direction = 1;// set direction back to 1
-        }
-    }
+    static int direction = 1;
+    procPos(direction, pos, pos_max);
 }
 
 // variables for changePixel
@@ -1663,22 +1657,9 @@ void ac::imageBlend(cv::Mat &frame) {
             }
         }
     }
-    static int direction = 1; // static direction is equal to 1
     static double pos_max = 7.0f;// max pos value
-    if(direction == 1) {// if direction is equal to 1
-        pos += 0.05; // add 0.05 to pos
-        if(pos > pos_max) {// greater than max pos size
-            pos = pos_max;// pos = pos_max
-            direction = 0;// direction set to zero
-            pos_max += 0.5f;// pos max increased by 0.5
-        }
-    } else if(direction == 0) {// direction is zero
-        pos -= 0.05;// pos minus equal 0.05
-        if(pos <= 1) {// pos less than 1
-            if(pos_max > 15) pos_max = 1.0f;// reset pos max
-            direction = 1;// direction set back to 1
-        }
-    }
+    static int direction = 1;
+    procPos(direction, pos, pos_max);
 }
 // takes cv::Mat reference
 void ac::imageBlendTwo(cv::Mat &frame) {
@@ -1702,22 +1683,9 @@ void ac::imageBlendTwo(cv::Mat &frame) {
             }
         }
     }
-    static int direction = 1;// static direction equals 1
     static double pos_max = 7.0f;// max position set to 7.0
-    if(direction == 1) {// direction equals 1
-        pos += 0.05;// pos plus equal 0.05
-        if(pos > pos_max) {// pos greater than pos_max
-            pos = pos_max;// pos equal pos_max
-            direction = 0;// direction set to zero
-            pos_max += 0.5f;// pos max increases by 0.5
-        }
-    } else if(direction == 0) {// direction equals 0
-        pos -= 0.05;// pos minus 0.05
-        if(pos <= 1) {// less than equal to one
-            if(pos_max > 15) pos_max = 1.0f;// reset
-            direction = 1;// set direction back to 1
-        }
-    }
+    static int direction = 1;
+    procPos(direction, pos, pos_max);
 }
 // blend with Image
 // takes cv::Mat reference
@@ -1889,22 +1857,9 @@ void ac::DiamondPattern(cv::Mat &frame) {
         }
     }
     // static direction starts off with 1
-    static int direction = 1;
     static double pos_max = 7.0f;// pos maximum
-    if(direction == 1) {// direction is 1
-        pos += 0.05;// pos plus equal 0.05
-        if(pos > pos_max) {// if pos greater than pos_max
-            pos = pos_max;// set pos to pos_max
-            direction = 0;// set direction to zero (go other direction)
-            pos_max += 0.5f;// pos_max plus equal 0.5
-        }
-    } else if(direction == 0) {// direction is equal to zero
-        pos -= 0.05;// pos minus equal 0.05
-        if(pos <= 1.0) {// if pos <= 1.0
-            if(pos_max > 15) pos_max = 1.0f;// reset is greater than 15
-            direction = 1;// set direction to 1
-        }
-    }
+    static int direction = 1;
+    procPos(direction, pos, pos_max);
 }
 // Mirror blend
 // blend current pixel in loop with current pixel
@@ -2016,24 +1971,10 @@ void ac::SidewaysMirror(cv::Mat &frame) {
             if(isNegative) invert(frame, z, i);
         }
     }
-    // static int variable for direction
-    static int direction = 1;
     // max size
     static double pos_max = 4.0f;
-    if(direction == 1) { // direction is 1
-        pos += 0.1; // add 0.1
-        if(pos > pos_max) {
-            pos = pos_max; // set to max
-            direction = 0; // set direction to 0
-            pos_max += 1.0f;// add 1 to pos_max
-        }
-    } else if(direction == 0) { // direction is 0
-        pos -= 0.1;// add 0.1 to pos
-        if(pos <= 1.0) {
-            if(pos_max > 4.0f) pos_max = 1.0f;
-            direction = 1; // set direction to 1
-        }
-    }
+    static int direction = 1;
+    procPos(direction, pos, pos_max);
 }
 
 // Mirror function without blending
@@ -2168,25 +2109,10 @@ void ac::DoubleVision(cv::Mat &frame) {
         }
     }
     // static int direction
-    static int direction = 1;
     // pos max
     static double pos_max = 7.0f;
-    // if direction equals 1
-    if(direction == 1) {
-        pos += 0.05; // pos plus equal 0.05
-        if(pos > pos_max) { // if pos > pos max
-            pos = pos_max; // pos = pos_max
-            direction = 0;// direction equals 0
-            pos_max += 0.5f; // pos_max increases by 0.5
-        }
-    } else if(direction == 0) {// direction equals 1
-        pos -= 0.05;// pos -= 0.05
-        if(pos <= 1.0) {// if pos <= 1.0
-            if(pos_max > 15) pos_max = 1.0f;// if pos max at maxmium
-            						// set to 1.0
-            direction = 1;// set direction back to 1
-        }
-    }
+    static int direction = 1;
+    procPos(direction, pos, pos_max);
 }
 // RGB Shift
 // takes cv::Mat reference
@@ -2210,10 +2136,10 @@ void ac::RGBShift(cv::Mat &frame) {
                     buffer[1] += g[1];
                     buffer[2] += b[2];
                 case 1:
-                    break;
                     buffer[0] += g[0];
                     buffer[1] += b[1];
                     buffer[2] += r[2];
+                    break;
                 case 2:
                     buffer[0] += b[0];
                     buffer[1] += r[1];
@@ -2329,16 +2255,9 @@ void ac::GradientRainbowFlash(cv::Mat &frame) {
 // Reverse Frame
 // takes cv::Mat reference
 void ac::Reverse(cv::Mat &frame) {
-    int w = frame.cols;// frame width
-    int h = frame.rows;// frame height
-    cv::Mat orig = frame.clone(); // clone frame (make a copy)
-    for(int z = 0; z < h; ++z) {// top to botom
-        for(int i = 1; i < w-1; ++i) { // left to right
-            cv::Vec3b &pixel = frame.at<cv::Vec3b>(z, i); // cur pixel
-            cv::Vec3b &rev = orig.at<cv::Vec3b>(z, (w-i)); // opposite pixel (width-i)
-            pixel = rev;
-        }
-    }
+    cv::Mat output;//output matrix
+    cv::flip(frame, output, 1); // flip image
+    frame = output; // set frame to output
 }
 // Scanlines - Draws scanlines like a CRT.
 void ac::Scanlines(cv::Mat &frame) {
@@ -2391,29 +2310,18 @@ void ac::MirrorAverage(cv::Mat &frame) {
             pixel[0] += ((mir_pix[0][0]+mir_pix[1][0]+mir_pix[2][0])/3)*pos;
             pixel[1] += ((mir_pix[0][1]+mir_pix[1][1]+mir_pix[2][1])/3)*pos;
             pixel[2] += ((mir_pix[0][2]+mir_pix[1][2]+mir_pix[2][2])/3)*pos;
+            
+            // swap colors
+            swapColors(frame, z, i);
+            // if isNegative true invert pixel
+            if(isNegative) invert(frame, z, i);
         }
     }
     // move up and down the color scale
-    // static int direction
-    static int direction = 1;
-    // pos max
+    
     static double pos_max = 7.0;
-    // if direction equals 1
-    if(direction == 1) {
-        pos += 0.05; // pos plus equal 0.05
-        if(pos > pos_max) { // if pos > pos max
-            pos = pos_max; // pos = pos_max
-            direction = 0;// direction equals 0
-            pos_max += 0.5f; // pos_max increases by 0.5
-        }
-    } else if(direction == 0) {// direction equals 1
-        pos -= 0.05;// pos -= 0.05
-        if(pos <= 1.0) {// if pos <= 1.0
-            if(pos_max > 15) pos_max = 1.0f;// if pos max at maxmium
-            // set to 1.0
-            direction = 1;// set direction back to 1
-        }
-    }
+    static int direction = 1;
+    procPos(direction, pos, pos_max);
 }
 // Mirror Average Mix
 // Takes cv::Mat matrix
@@ -2435,27 +2343,196 @@ void ac::MirrorAverageMix(cv::Mat &frame) {
             pixel[0] += ((mir_pix[0][0]+mir_pix[0][1]+mir_pix[0][2])/3)*pos;
             pixel[1] += ((mir_pix[1][0]+mir_pix[1][1]+mir_pix[1][2])/3)*pos;
             pixel[2] += ((mir_pix[2][0]+mir_pix[2][1]+mir_pix[2][2])/3)*pos;
+            // swap colors
+            swapColors(frame, z, i);
+            // if isNegative true invert pixel
+            if(isNegative) invert(frame, z, i);
         }
     }
-    // static int direction
-    static int direction = 1;
     // pos max
     static double pos_max = 7.0;
-    // if direction equals 1
-    if(direction == 1) {
-        pos += 0.05; // pos plus equal 0.05
-        if(pos > pos_max) { // if pos > pos max
-            pos = pos_max; // pos = pos_max
-            direction = 0;// direction equals 0
-            pos_max += 0.5; // pos_max increases by 0.5
+    static int direction = 1;
+    procPos(direction, pos, pos_max);
+}
+// Mean takes cv::Mat reference
+void ac::Mean(cv::Mat &frame) {
+    static double pos = 1.0;
+    int w = frame.cols;// frame width
+    int h = frame.rows;// frame height
+    cv::Scalar s = cv::mean(frame);
+    for(int z = 0; z < h; ++z) {
+        for(int i = 0; i < w; ++i) {
+            cv::Vec3b &pixel = frame.at<cv::Vec3b>(z, i);
+            pixel[0] += pos*s[0];
+            pixel[1] += pos*s[1];
+            pixel[2] += pos*s[2];
+            swapColors(frame, z, i);
+            // if isNegative true invert pixel
+            if(isNegative) invert(frame, z, i);
         }
-    } else if(direction == 0) {// direction equals 1
-        pos -= 0.05;// pos -= 0.05
-        if(pos <= 1.0) {// if pos <= 1.0
-            if(pos_max > 15) pos_max = 1.0;// if pos max at maxmium
-            // set to 1.0
-            direction = 1;// set direction back to 1
+    }
+    
+    static double pos_max = 7.0;
+    static int direction = 1;
+    procPos(direction, pos, pos_max);
+}
+
+// Laplacian - takes cv::Mat reference
+void ac::Laplacian(cv::Mat &frame) {
+    cv::Mat out;
+    cv::Laplacian(frame, out, CV_8U);
+    frame = out;
+}
+
+// XOR - takes cv::Mat reference
+void ac::Bitwise_XOR(cv::Mat &frame) {
+    static cv::Mat initial = frame;
+    if(initial.cols != frame.cols || initial.rows != frame.rows) {
+        initial = frame;
+    }
+    cv::Mat start = frame.clone();
+    cv::Mat output;
+    cv::bitwise_xor(frame, initial, output);
+    initial = start;
+    frame = output;
+}
+
+// And takes cv::Mat reference
+void ac::Bitwise_AND(cv::Mat &frame) {
+    static cv::Mat initial = frame;
+    if(initial.cols != frame.cols || initial.rows != frame.rows) {
+        initial = frame;
+    }
+    cv::Mat start = frame.clone();
+    cv::Mat output;
+    cv::bitwise_and(frame, initial, output);
+    initial = start;
+    frame = output;
+}
+// takes cv::Mat reference
+void ac::Bitwise_OR(cv::Mat &frame) {
+    static cv::Mat initial = frame;
+    if(initial.cols != frame.cols || initial.rows != frame.rows) {
+        initial = frame;
+    }
+    cv::Mat start = frame.clone();
+    cv::Mat output;
+    cv::bitwise_or(frame, initial, output);
+    initial = start;
+    frame = output;
+}
+// takes cv::Mat reference
+// Equalize image
+void ac::Equalize(cv::Mat &frame) {
+    cv::Mat output[3];
+    std::vector<cv::Mat> v;
+    cv::split(frame, v);
+    cv::equalizeHist(v[0], output[0]);
+    cv::equalizeHist(v[1], output[1]);
+    cv::equalizeHist(v[2], output[2]);
+    cv::merge(output,3,frame);
+}
+
+// Channel sort - takes cv::Mat reference
+void ac::ChannelSort(cv::Mat &frame) {
+    static double pos = 1.0; // color scale
+    std::vector<cv::Mat> v; // to hold the Matrix for split
+    cv::split(frame, v);// split the channels into seperate matrices
+    cv::Mat channels[3]; // output channels
+    cv::Mat output; // for merge
+    cv::sort(v[0], channels[0],cv::SORT_ASCENDING); // sort each matrix
+    cv::sort(v[1], channels[1],cv::SORT_ASCENDING);
+    cv::sort(v[2], channels[2],cv::SORT_ASCENDING);
+    cv::merge(channels, 3, output); // combine the matrices
+    for(int z = 0; z < frame.rows; ++z) { // top to bottom
+        for(int i = 0; i < frame.cols; ++i) { // left to right
+            cv::Vec3b &pixel = frame.at<cv::Vec3b>(z, i); // get reference to pixel
+            cv::Vec3b &ch_pixel = output.at<cv::Vec3b>(z, i); // get reference to pixel
+            // add and multiply components to channels
+            pixel[0] += ch_pixel[0]*pos;
+            pixel[1] += ch_pixel[1]*pos;
+            pixel[2] += ch_pixel[2]*pos;
+            // swap colors
+            swapColors(frame, z, i);
+            // if isNegative true invert pixel
+            if(isNegative) invert(frame, z, i);
         }
+    }
+    // pos max
+    static double pos_max = 7.0;
+    static int direction = 1;
+    procPos(direction, pos, pos_max);
+}
+
+// takes cv::Mat reference
+void ac::Reverse_XOR(cv::Mat &frame) {
+    static cv::Mat initial = frame;
+    if(initial.cols != frame.cols || initial.rows != frame.rows) {
+        initial = frame;
+    }
+    static double pos = 1.0;
+    cv::Mat start = frame.clone();
+    for(int z = 0; z < frame.rows; ++z) {
+        for(int i = 0; i < frame.cols; ++i) {
+            cv::Vec3b &pixel = frame.at<cv::Vec3b>(z, i);
+            cv::Vec3b &in_pixel = initial.at<cv::Vec3b>(z, i);
+            pixel[0] ^= in_pixel[2];
+            pixel[1] ^= in_pixel[1];
+            pixel[2] ^= in_pixel[0];
+            // swap colors
+            swapColors(frame, z, i);
+            // if isNegative true invert pixel
+            if(isNegative) invert(frame, z, i);
+        }
+    }
+    initial = start;
+    static double pos_max = 7.0;
+    static int direction = 1;
+    procPos(direction, pos, pos_max);
+}
+
+// takes cv::Mat reference
+void ac::CombinePixels(cv::Mat &frame) {
+    static double pos = 1.0, pos_max = 7.0;
+    static int direction = 1;
+    cv::Scalar s(1.0, 100.0, 200.0);
+    for(int z = 2; z < frame.rows-2; ++z) {
+        for(int i = 2; i < frame.cols-2; ++i) {
+            cv::Vec3b &pixel = frame.at<cv::Vec3b>(z, i);
+            cv::Vec3b pixels[4];
+            pixels[0] = frame.at<cv::Vec3b>(z, i+1);
+            pixels[1] = frame.at<cv::Vec3b>(z+1, i);
+            pixels[2] = frame.at<cv::Vec3b>(z+1, i+1);
+            pixel[0] ^= (pixels[0][0]+pixels[1][0]+pixels[2][0]);
+            pixel[1] ^= (pixels[0][1]+pixels[1][1]+pixels[2][1]);
+            pixel[2] ^= (pixels[0][2]+pixels[1][2]+pixels[2][2]);
+            pixel[0] *= pos;
+            pixel[1] *= pos;
+            pixel[2] *= pos;
+            // swap colors
+            swapColors(frame, z, i);
+            // if isNegative true invert pixel
+            if(isNegative) invert(frame, z, i);
+        }
+    }
+    procPos(direction, pos, pos_max);
+}
+
+// Flip takes cv::Mat reference
+// flip the iamge every other frame
+void ac::FlipTrip(cv::Mat &frame) {
+    static int _flip = 0;// index variable
+    cv::Mat output;// output matrix
+    switch(_flip){
+        case 0:
+            cv::flip(frame, output, 1); // flip matrix
+            frame = output;// frame equals output
+            _flip++;// increase index
+            break;
+        case 1:
+            // do nothing
+            _flip = 0; // index equals zero
+            break;
     }
 }
 
